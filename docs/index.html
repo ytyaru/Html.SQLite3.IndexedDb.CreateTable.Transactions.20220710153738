@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+<head prefix="og: https://ogp.me/ns# article: https://ogp.me/ns/article#">
+<meta charset="utf-8">
+<title>モナコイン取引集計＋取引ユーザ相関図2</title>
+<meta name="description" content="取引の総額や相手のアドレスと数などを表示する。">
+<meta name="author" content="ytyaru">
+<link rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja">
+<link rel="icon" href="asset/image/avator.png">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/toot-dialog.css">
+<link rel="stylesheet" href="css/transaction.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:type" content="profile" />
+<meta property="og:site_name" content="ytyaru" />
+<meta property="og:title" content="モナコイン取引集計＋取引ユーザ相関図2" />
+<meta property="og:description" content="取引の総額や相手のアドレスと数などを表示する。" />
+<meta property="og:image" content="https://ytyaru.github.io/Html.Mona.Transaction.Get.20220618094040/asset/image/eye-catch.png" />
+<meta property="article:modified_time" content="2022-07-09T10:00:00+09:00" />
+<meta property="article:published_time" content="2022-07-08T15:50:00+09:00" />
+<meta property="article:author" content="https://ytyaru.github.io/" />
+<meta name="twitter:card" content="summary_large_image" />
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Article",
+    "author": {
+      "@type": "Person",
+      "name": "ytyaru",
+      "url": "https://ytyaru.github.io/",
+      "sameAs": [
+        "https://twitter.com/ytyaru1",
+        "https://github.com/ytyaru",
+        "https://profile.hatena.ne.jp/ytyaru/",
+        "https://mstdn.jp/@ytyaru",
+        "https://pawoo.net/@ytyaru_pawoo",
+        "https://www.pixiv.net/users/53831310",
+        "https://monaledge.com/user/MEHCqJbgiNERCH3bRAtNSSD9uxPViEX1nu",
+        "https://web3.askmona.org/user/1590",
+        "https://misskey.io/@ytyaru",
+        "https://misskey.dev/@ytyaru",
+        "https://sushi.ski/@ytyaru",
+        "https://meisskey.one/@ytyaru",
+      ]
+    },
+    "dateModified": "2022-07-09T10:00:00+09:00",
+    "datePublished": "2022-07-08T15:50:00+09:00",
+    "headline": "モナコイン取引集計＋取引ユーザ相関図2",
+    "image": ["https://ytyaru.github.io/Html.Mona.Transaction.Get.20220618094040/asset/image/eye-catch.png"]
+  }
+</script>
+<link rel="webmention" href="https://webmention.io/ytyaru.github.io/webmention" />
+<link rel="pingback" href="https://webmention.io/ytyaru.github.io/xmlrpc" />
+<link rel="me" href="https://twitter.com/ytyaru1">
+<link rel="me" href="https://mstdn.jp/@ytyaru">
+<link rel="me" href="https://pawoo.net/@ytyaru_pawoo">
+<link rel="me" href="https://misskey.io/@ytyaru">
+<link rel="me" href="https://misskey.dev/@ytyaru">
+<link rel="me" href="https://github.com/ytyaru">
+<link rel="me" href="https://profile.hatena.ne.jp/ytyaru/">
+<link rel="me" href="https://ytyaru.hatenablog.com/">
+<link rel="me" href="https://www.pixiv.net/users/53831310">
+<link rel="me" href="https://monaledge.com/user/MEHCqJbgiNERCH3bRAtNSSD9uxPViEX1nu">
+<link rel="me" href="https://web3.askmona.org/user/1590">
+<link rel="me" href="https://misskey.io/@ytyaru">
+<link rel="me" href="https://misskey.dev/@ytyaru">
+<link rel="me" href="https://sushi.ski/@ytyaru">
+<link rel="me" href="https://meisskey.one/@ytyaru">
+
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+<script src="./lib/tingle/0.16.0/tingle.js"></script>
+<link rel="stylesheet" href="./lib/tingle/0.16.0/tingle.css">
+<!--<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">-->
+<link rel="stylesheet" type="text/css" href="./lib/toastify/1.11.2/min.css">
+<!--<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>-->
+<script type="text/javascript" src="./lib/toastify/1.11.2/min.js"></script>
+<script src="lib/party/party.min.js"></script>
+<script src="lib/dexie/3.2.2/min.js"></script>
+<script src="lib/sql.js/1.7.0/sql-wasm.min.js"></script>
+<script src="lib/jszip/3.9.1/min.js"></script>
+
+<script src="js/loading.js"></script>
+<script src="js/toaster.js"></script>
+<script src="js/rest-client.js"></script>
+<script src="js/misskey-rest-client.js"></script>
+<script src="js/misskey-instance.js"></script>
+<script src="js/misskey-authorizer.js"></script>
+<script src="js/misskey-authorizer-oauth.js"></script>
+<script src="js/misskey-authorizer-miauth.js"></script>
+<script src="js/misskey-api-client.js"></script>
+<script src="js/misskey-note-button.js"></script>
+<script src="js/misskey-note-dialog.js"></script>
+<script src="js/webmention-requester.js"></script>
+<script src="js/mastodon-rest-client.js"></script>
+<script src="js/mastodon-authorizer.js"></script>
+<script src="js/mastodon-api-client.js"></script>
+<script src="js/toot-button.js"></script>
+<script src="js/toot-dialog.js"></script>
+<script src="js/comment.js"></script>
+<script src="js/tweet-button.js"></script>
+<script src="js/mention-section.js"></script>
+<script src="js/mpurse-send-button.js"></script>
+<script src="js/party-sparkle-image.js"></script>
+<script src="js/party-sparkle-hart.js"></script>
+<script src="js/mastodon-instance.js"></script>
+<script src="js/mastodon-profile-generator.js"></script>
+<script src="js/misskey-profile-generator.js"></script>
+<script src="js/mastodon-redirect-callback-reciver.js"></script>
+<script src="js/misskey-redirect-callback-reciver.js"></script>
+<script src="js/profile-register.js"></script>
+<script src="js/google-apps-script-client.js"></script>
+<script src="js/profile-generator.js"></script>
+
+<script src="js/trezor-client.js"></script>
+<script src="js/mona-transaction-db.js"></script>
+<script src="js/mona-transaction-client.js"></script>
+<script src="js/mona-transaction-viewer.js"></script>
+<script src="js/circle-svg-generator.js"></script>
+
+<script src="js/circle-svg-generator-from-db.js"></script>
+<script src="js/mona-transaction-viewer-from-db.js"></script>
+
+<script src="js/sqlite3-db-file.js"></script>
+<!--<script src="js/sqlite3-db-uploader.js"></script>-->
+<script src="js/sqlite3-db-downloader.js"></script>
+
+<script src="js/main.js"></script>
+</head>
+<body>
+<h1>モナコイン取引集計＋取引ユーザ相関図2</h1>
+<p>取引の総額や相手のアドレスと数などを表示する。プロフィールは<a href="https://ytyaru.github.io/Html.GAS.Mastodon.Misskey.Address.Profile.20220620171245/">mpurseのアドレスとプロフィールを登録する</a>で登録されたものを使う。なければアドレスのみ。</p>
+<details><summary>旧版</summary>
+<ul>
+<li><a href="https://ytyaru.github.io/Html.Mona.Transaction.Viewer.Circle.20220621093148/">モナコイン取引集計＋取引ユーザ相関図</a></li>
+</ul>
+</details>
+
+
+<!--
+<svg width="240" height="240">
+  <style>.clip-96{clip-path: circle(96px at 50% 50%);}.clip-64{clip-path: circle(64px at 50% 50%);}</style>
+  <rect x="0" y="0" width="240" height="240" style="fill:green" />
+  <defs>
+    <style type="text/css"><![CDATA[
+      image { clip-path: circle(50px at center); }
+    ]]></style>
+  </defs>
+  <a href="https://ytyaru.github.io/"><image href="./asset/image/avator.png" width="96" height="96" x="72" y="72" /></a>
+  <a href=""><image href="./asset/image/user/kkrn_icon_user_3_resize_min.svg" width="64" height="64" x="88" y="8" /></a>
+  <a href=""><image href="./asset/image/user/kkrn_icon_user_3_resize_min.svg" width="64" height="64" x="168" y="88" /></a>
+  <a href=""><image href="./asset/image/user/kkrn_icon_user_3_resize_min.svg" width="64" height="64" x="88" y="168" /></a>
+  <a href=""><image href="./asset/image/user/kkrn_icon_user_3_resize_min.svg" width="64" height="64" x="8" y="88" /></a>
+</svg>
+-->
+<input id="address" value="" placeholder="モナコインのアドレス">
+<button id="get-transaction" type="button">取引情報を取得する</button>
+<textarea id="response" value="" placeholder="取引情報JSON"></textarea>
+<progress id="progress" max="100" value="0" style="display:none;"></progress><span id="progress-rate"></span>
+<button id="download" type="button">取引情報をダウンロードする（.sqlite3）</button>
+<div id="export-transaction"></div>
+<!--
+-->
+
+<!--
+<h1><a href="https://ytyaru.github.io/Html.Mpurse.Api.20220517160403/setup.html" target="_blank" rel="noopener noreferrer">mpurse</a>のアドレスとプロフィールを登録する</h1>
+-->
+<!--
+<details><summary>使い方</summary>
+<ol>
+<li><a href="https://ytyaru.github.io/Html.Mpurse.Api.20220517160403/setup.html" target="_blank" rel="noopener noreferrer">mpurseのアドレスを作成する</a></li>
+<li>このページで名前などを入力する</li>
+<li><kbd>登録する</kbd>ボタンを押す</li>
+<li>「登録しました！」と表示される</li>
+</ol>
+<p>もし作成したのにアドレスが表示されないなら以下をお試しください。</p>
+<ol>
+<li>ブラウザのメニューにある拡張機能アイコンをクリックする</li>
+<li><kbd>Mpurse</kbd>をクリックする</li>
+<li><kbd>パスワード</kbd>を入力する</li>
+<li><kbd>承認</kbd>ボタンをクリックする</li>
+<li>このページをリロードする（<kbd>F5</kbd>キー等）</li>
+</ol>
+</details>
+<span>登録者数：<span id="regist-count"></span>人</span>
+<form id="regist-form"><fieldset>
+    <legend>プロフィール</legend>
+    <table>
+    <tr><th>アドレス</th><td><input id="address" value="" placeholder="モナコインのアドレス" required disabled> ※必須</td></tr>
+    <tr><th>名前</th><td><input id="name" value="" placeholder="あなたの表示名" required> ※必須</td></tr>
+    <tr><th>画像</th><td><input id="avatar" value="" placeholder="https://your.site/avatar.png"></td></tr>
+    <tr><th>URL</th><td><input id="url" value="" placeholder="https://your.site/"></td></tr>
+    <tr><th>紹介</th><td><textarea id="description" value="" placeholder="私はこういう者です。"></textarea></td></tr>
+    <tr><th>補足情報</th>
+        <td>
+        <table>
+            <tr><td><input id="field-1-key" placeholder="項目名"></td><td><input id="field-1-value" placeholder="値"></td></tr>
+            <tr><td><input id="field-2-key" placeholder="項目名"></td><td><input id="field-2-value" placeholder="値"></td></tr>
+            <tr><td><input id="field-3-key" placeholder="項目名"></td><td><input id="field-3-value" placeholder="値"></td></tr>
+            <tr><td><input id="field-4-key" placeholder="項目名"></td><td><input id="field-4-value" placeholder="値"></td></tr>
+        </table>
+        </td>
+    </tr>
+    </table>
+    <br>
+    <button id="regist" type="button">登録する</button>
+</fieldset></form>
+<div id="html-profile"></div>
+-->
+<!--
+<button id="get" type="button">取得する</button>
+-->
+<!--<button id="get" type="button">取得する</button>-->
+<!--
+<details><summary>追加情報</summary>
+<h2>保存先</h2>
+<p>　情報は<a href="https://docs.google.com/spreadsheets/d/1r3dS6Q6bm7RduRagrHzHbPlGXtvxCg63NE3TXZIVXFc/edit?usp=sharing" target="_blank" rel="noopener noreferrer">SpreadSheet</a>に保存されます。</p>
+<h2>投げモナボタンを追加表示する</h2>
+<p>　プロフィール補足情報のラベルが「モナコイン」または「MONACOIN」であり、かつその値がmpurseのアドレスらしき文字列であれば、追加で投げモナボタンを表示できる。</p>
+<p>　「mpurseのアドレスらしき文字列」とは最初にみつけた34字以上の連続した英数字である。（正規表現「/[a-zA-Z0-9]{34,}/g」）</p>
+<h2>技術情報</h2>
+<h3>GASのCORSエラーを解決するために</h3>
+<p>　<code>Content-Type: application/json<code>にするとCORSエラーになる。<code>x-www-form-urlencoded</code>で送受信すると成功する。<a href="https://knmts.com/become-engineer-31/" target="_blank" rel="noopener noreferrer">参考</a>, <a href="https://qiita.com/masakielastic/items/70516e074eadf2ce09dd" target="_blank" rel="noopener noreferrer">参考2</a>, <a href="https://qiita.com/att55/items/04e8080d1c441837ad42" target="_blank" rel="noopener noreferrer">参考3</a></p>
+<p>　<a href="https://ytyaru.github.io/Html.Address.Profile.Register.20220614140841/" target="_blank" rel="noopener noreferrer">失敗例</a></p>
+<h2>課題</h2>
+<ul>
+<li><a href="https://monaledge.com/article/401" target="_blank" rel="noopener noreferrer">ブラウザ上でアドレスの本人確認ができない</a></li>
+<li>上記のため、仕方なくmpurseの<code>getAddress()</code>による入力のみ受け付けるようにすることをもって本人確認とした</li>
+<li>上記のため、mpurse以外のアドレスを登録できない</li>
+</ul>
+</details>
+-->
+
+<footer><a href="https://ytyaru.github.io/" title="著者" target="_blank" rel="noopener noreferrer"><img src="./asset/image/avator.png" width="64" height="64">ytyaru</a><mpurse-send-button to="MEHCqJbgiNERCH3bRAtNSSD9uxPViEX1nu" img="coin-monar"></mpurse-send-button><a href="https://ytyaru.github.io/Html.Mpurse.Api.20220517160403/setup.html" title="モナコインを使うには">？</a></footer>
+
+<tweet-button text="いいね！\n"></tweet-button>
+<toot-dialog domain="mstdn.jp pawoo.net" status="いいね！"></toot-dialog>
+<misskey-note-dialog domain="misskey.io misskey.dev" status="いいね！"></misskey-note-dialog>
+<mention-section></mention-section>
+</body>
+</html>
+
