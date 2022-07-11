@@ -220,8 +220,6 @@ window.addEventListener('DOMContentLoaded', async(event) => {
             const addr  = address || await window.mpurse.getAddress()
             if (!dbs.has(addr)) {
                 dbs.set(addr, new MonaTransactionDb(addr))
-                console.debug(addr)
-                console.debug(dbs.get(addr))
             }
             document.getElementById('address').value = addr
             document.getElementById('get-transaction').dispatchEvent(new Event('click'))
@@ -303,7 +301,7 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         console.debug(event.detail.error_description)
         Toaster.toast('キャンセルしました')
     });
-    init()
+    await init()
     // mpurseアドレスのプロフィール情報を取得する
     //initForm()
     // リダイレクト認証後
