@@ -33,6 +33,12 @@ class Sqlite3DbFile { // FileSystemAccess API は Chromeでしか使えない
         //document.getElementById(`update`).disabled = false
         return this.db
     }
+    async load(unit8Array) {
+        if (!this.SQL) {
+            this.SQL = await initSqlJs({locateFile: file => `${this.PATH_WASM}/${file}`})
+        }
+        return new this.SQL.Database(dbAsUint8Array)
+    }
     async #getDirectoryPicker() {
         if (this.#dirHandle) { return this.#dirHandle }
         try {
