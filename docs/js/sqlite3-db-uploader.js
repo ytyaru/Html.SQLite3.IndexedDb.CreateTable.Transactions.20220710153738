@@ -50,25 +50,15 @@ class Sqlite3DbUploader {
         const validTableNames = ['last', 'send_partners', 'receive_partners', 'transactions']
         if (!tableNames.every(name=>validTableNames.include(name))) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
         //if (!tableNames.all(validTableNames)) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
-        if (!tableNames.map(name=>this.#validRow(name)).every
-        let lCnt = db.exec(`select count(*) from transactions;`)
-        const bCnt = await this.dbs.get(this.my).dexie.transactions.count()
-        if (lCnt < bCnt) { this.#validError(`transactionsテーブルのレコード数がIndexedDBのそれより少ないです。古いDBとみなし取込を中止します。`) }
-        let targetTableName = `transactions`
-        let lCnt = db.exec(`select count(*) from transactions;`)
-        if (0 == lCnt) { this.#validError(`transactionsテーブルのレコード数がIndexedDBのそれより少ないです。古いDBとみなし取込を中止します。`) }
-        lCnt = db.exec(`select count(*) from transactions;`)
-        lCnt = db.exec(`select count(*) from transactions;`)
-        lCnt = db.exec(`select count(*) from transactions;`)
-
-        if (
-
-        const lastFields = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]
-        if (!tableNames.all(validTableNames)) {
-
-        }
+        if (!tableNames.map(name=>this.#validRow(db, name)).every()) { return }
     }
-    #validRow(name) {
+    #validField(db) {
+        const lastFieldsValid = ['id', 'count', 'last_block_height', 'last_txid', 'send_value', 'receive_value', 'balance', 'fee', 'unconfirmed_balance', 'unconfirmed_txs', 'send_count', 'receive_count', 'send_address_count', 'receive_address_count', 'both_address_count', 'firsted', 'lasted']
+        const lastFields = db.exec(`PRAGMA table_info('last');`)
+        console.debug(lastFields)
+        lastFields.map(f=>f[1]).every(n=>lastFieldsValid.includes(n)) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
+    }
+    #validRow(db, name) {
         const lCnt = db.exec(`select count(*) from ${name};`)
         if (0 == lCnt) { return this.#validError(`${name}テーブルのレコード数が0件です。1件以上あるときのみ取込できます。`) }
         const bCnt = await this.dbs.get(this.my).dexie[name].count()
