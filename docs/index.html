@@ -122,7 +122,7 @@
 <script src="js/mona-transaction-viewer-from-db.js"></script>
 
 <script src="js/sqlite3-db-file.js"></script>
-<!--<script src="js/sqlite3-db-uploader.js"></script>-->
+<script src="js/sqlite3-db-uploader.js"></script>
 <script src="js/sqlite3-db-downloader.js"></script>
 
 <script src="js/main.js"></script>
@@ -158,6 +158,10 @@
 <textarea id="response" value="" placeholder="取引情報JSON"></textarea>
 <progress id="progress" max="100" value="0" style="display:none;"></progress><span id="progress-rate"></span>
 <button id="download" type="button">取引情報をダウンロードする（.sqlite3）</button>
+<div id="drop-zone" style="border:1px solid; padding:32px;">
+<p>ファイルをドラッグ＆ドロップ</p>
+または<input type="file" name="file" id="file-input">
+</div>
 <div id="export-transaction"></div>
 <!--
 -->

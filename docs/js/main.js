@@ -17,6 +17,8 @@ window.addEventListener('DOMContentLoaded', async(event) => {
     document.getElementById('get-transaction').addEventListener('click', async(event) => {
         const address = document.getElementById('address').value
         if (!address) { return }
+        const uploader = new Sqlite3DbUploader(sqlFile, dbs, address)
+        uploader.setup() 
         console.debug(address)
         console.debug(dbs)
         console.debug(dbs.get(address))

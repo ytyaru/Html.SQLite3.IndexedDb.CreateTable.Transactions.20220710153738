@@ -41,24 +41,104 @@ class Sqlite3DbUploader {
         }, false);
     }
     async #load(content) { // ローカルのsqlite3ファイルからIndexedDBへマージする
+        console.debug(this.sqlFile)
         const db = await this.sqlFile.load(content)
-        if (!this.#valid(db) { return }
+        if (!this.#valid(db)) { return }
+        /*
+        for (const name of ['last', 'send_partners', 'receive_partners', 'transactions']) {
+            await this.dbs.get(this.my).dexie[name].clear()
+        }
+        */
+        let rows = db.exec(`select * from last;`)
+        console.debug(rows)
+        for (const row of rows) {
+            await this.dbs.get(this.my).dexie['last'].put({
+                id: 1,
+                count: row.count,
+                lastBlockHeight: row.last_block_height,
+                lastTxId: row.last_txid,
+                sendValue: row.send_value,
+                receiveValue: row.receive_value,
+                balance: row.balance,
+                fee: row.fee,
+                unconfirmedBalance: row.unconfirmed_balance,
+                unconfirmedTxs: row.unconfirmed_txs,
+                sendCount: row.send_count,
+                receiveCount: row.receive_count,
+                sendAddressCount: row.send_address_count,
+                receiveAddressCount: row.receive_address_count,
+                bothAddressCount: row.both_address_countbothAddrsAry.length,
+                firsted: row.firsted,
+                lasted: row.lasted,
+            })
+            
+        }
+        rows = db.exec(`select * from send_partners;`)
+        console.debug(rows)
+        for (const row of rows) {
+            await dbs.get(address).dexie.sendPartners.put({
+                address: row.address,
+                value: row.value,
+                count: row.count,
+                firsted: row.firsted,
+                lasted: row.lasted,
+            })
+        }
+        rows = db.exec(`select * from receive_partners;`)
+        console.debug(rows)
+        for (const row of rows) {
+            await dbs.get(address).dexie.receivePartners.put({
+                address: row.address,
+                value: row.value,
+                count: row.count,
+                firsted: row.firsted,
+                lasted: row.lasted,
+            })
+        }
+        rows = db.exec(`select * from transactions;`)
+        console.debug(rows)
+        for (const row of rows) {
+            await dbs.get(address).dexie.transactions.put({
+                txid: row.txid,
+                isSend: row.is_send,
+                addresses: row.addresses,
+                value: row.value,
+                fee: row.fee,
+                confirmations: row.confirmations,
+                blockTime: row.block_time,
+                blockHeight: row.block_height,
+            })
+        }
     }
     async #valid(db) {
         const tableNames = db.exec(`select name from sqlite_master;`)
         console.debug(tableNames)
         const validTableNames = ['last', 'send_partners', 'receive_partners', 'transactions']
-        if (!tableNames.every(name=>validTableNames.include(name))) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
+        if (!tableNames.every(name=>validTableNames.includes(name))) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
         //if (!tableNames.all(validTableNames)) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
-        if (!tableNames.map(name=>this.#validRow(db, name)).every()) { return }
+        if (!tableNames.map(name=>this.#validRow(db, name)).every()) { return false }
+        const validRow = await Promise.all(tableNames.map(async(name)=>await this.#validRow(db, name)).every());
+        if (!validRow) { return false }
+        if (!this.#validFields(db)) { return false }
+        return true
     }
-    #validField(db) {
+    #validFields(db) {
         const lastFieldsValid = ['id', 'count', 'last_block_height', 'last_txid', 'send_value', 'receive_value', 'balance', 'fee', 'unconfirmed_balance', 'unconfirmed_txs', 'send_count', 'receive_count', 'send_address_count', 'receive_address_count', 'both_address_count', 'firsted', 'lasted']
         const lastFields = db.exec(`PRAGMA table_info('last');`)
         console.debug(lastFields)
-        lastFields.map(f=>f[1]).every(n=>lastFieldsValid.includes(n)) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
+        if (!this.#validField(db, 'last', ['id', 'count', 'last_block_height', 'last_txid', 'send_value', 'receive_value', 'balance', 'fee', 'unconfirmed_balance', 'unconfirmed_txs', 'send_count', 'receive_count', 'send_address_count', 'receive_address_count', 'both_address_count', 'firsted', 'lasted'])) { return false }
+        if (!this.#validField(db, 'send_partners', ['address', 'value', 'count', 'firsted', 'lasted'])) { return false }
+        if (!this.#validField(db, 'receive_partners', ['address', 'value', 'count', 'firsted', 'lasted'])) { return false }
+        if (!this.#validField(db, 'transactions', ['txid', 'is_send', 'addresses', 'value', 'fee', 'confirmations', 'block_time', 'block_height'])) { return false }
+        return true
     }
-    #validRow(db, name) {
+    #validField(db, tableName, valids) {
+        const fields = db.exec(`PRAGMA table_info('${tableName}');`)
+        console.debug(lastFields)
+        if (!fields.map(f=>f[1]).every(n=>valids.includes(n))) { return this.#validError(`必要な列名が存在しません。次の名前のテーブルに次の列名を用意してください。${tableName}: ${valids.join(',')}`) }
+        return true
+    }
+    async #validRow(db, name) {
         const lCnt = db.exec(`select count(*) from ${name};`)
         if (0 == lCnt) { return this.#validError(`${name}テーブルのレコード数が0件です。1件以上あるときのみ取込できます。`) }
         const bCnt = await this.dbs.get(this.my).dexie[name].count()
