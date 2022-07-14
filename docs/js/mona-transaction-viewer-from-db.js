@@ -45,6 +45,7 @@ class MonaTransactionViewerFromDb {
     }
 
     #makeTime(date) { // date型
+        if (isNaN(date)) { return '' } // 未承認トランザクションはblockTimeなどが-1になる。new Date(-1*1000)はNaNになる。
         //console.debug(date)
         const iso = date.toISOString()
         const month = (date.getMonth()+1).toString().padStart(2, '0')

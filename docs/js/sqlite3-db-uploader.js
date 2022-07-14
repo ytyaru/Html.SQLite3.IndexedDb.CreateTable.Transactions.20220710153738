@@ -5,7 +5,7 @@ class Sqlite3DbUploader {
         this.dbs = dbs
         this.my = my
     }
-    setup() {
+    async setup() {
         const self = this
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
@@ -22,8 +22,15 @@ class Sqlite3DbUploader {
             e.preventDefault();
             e.target.style.background = '#ffffff';
         }, false);
-        fileInput.addEventListener('change', ()=>{
-            previewFile(this.files[0]);
+        fileInput.addEventListener('change', async(e)=>{
+            Loading.show()
+            const fr = new FileReader();
+            console.debug(e)
+            console.debug(e.target.files)
+            fr.readAsArrayBuffer(e.target.files[0])
+            fr.onload = async()=>{ await this.#load(new Uint8Array(fr.result)) }
+            //previewFile(this.files[0]);
+            //await this.#load(new Uint8Array(this.files[0])) 
         });
         dropZone.addEventListener('drop', async(e)=>{
             Loading.show()
@@ -43,7 +50,8 @@ class Sqlite3DbUploader {
     async #load(content) { // ローカルのsqlite3ファイルからIndexedDBへマージする
         console.debug(this.sqlFile)
         const db = await this.sqlFile.load(content)
-        if (!this.#valid(db)) { return }
+        let res = await this.#valid(db)
+        if (!res) { Loading.hide(); return; }
         /*
         for (const name of ['last', 'send_partners', 'receive_partners', 'transactions']) {
             await this.dbs.get(this.my).dexie[name].clear()
@@ -52,7 +60,30 @@ class Sqlite3DbUploader {
         let rows = db.exec(`select * from last;`)
         console.debug(rows)
         for (const row of rows) {
-            await this.dbs.get(this.my).dexie['last'].put({
+            console.debug(row)
+            if (1 !== row.id) { continue }
+            const v = row.values
+            await this.dbs.get(this.my).dexie.last.put({
+                id: 1,
+                count: v[1],
+                lastBlockHeight: v[2],
+                lastTxId: v[3],
+                sendValue: v[4],
+                receiveValue: v[5],
+                balance: v[6],
+                fee: v[7],
+                unconfirmedBalance: v[8],
+                unconfirmedTxs: v[9],
+                sendCount: v[10],
+                receiveCount: v[11],
+                sendAddressCount: v[12],
+                receiveAddressCount: v[13],
+                bothAddressCount: v[14],
+                firsted: v[15],
+                lasted: v[16],
+            })
+            /*
+            await this.dbs.get(this.my).dexie.last.put({
                 id: 1,
                 count: row.count,
                 lastBlockHeight: row.last_block_height,
@@ -67,38 +98,70 @@ class Sqlite3DbUploader {
                 receiveCount: row.receive_count,
                 sendAddressCount: row.send_address_count,
                 receiveAddressCount: row.receive_address_count,
-                bothAddressCount: row.both_address_countbothAddrsAry.length,
+                bothAddressCount: row.both_address_count,
                 firsted: row.firsted,
                 lasted: row.lasted,
             })
-            
+            */
         }
         rows = db.exec(`select * from send_partners;`)
         console.debug(rows)
         for (const row of rows) {
-            await dbs.get(address).dexie.sendPartners.put({
+            const v = row.values
+            await this.dbs.get(this.my).dexie.sendPartners.put({
+                address: v[0],
+                value: v[1],
+                count: v[2],
+                firsted: v[3],
+                lasted: v[4],
+            })
+            /*
+            await this.dbs.get(this.my).dexie.sendPartners.put({
                 address: row.address,
                 value: row.value,
                 count: row.count,
                 firsted: row.firsted,
                 lasted: row.lasted,
             })
+            */
         }
         rows = db.exec(`select * from receive_partners;`)
         console.debug(rows)
         for (const row of rows) {
-            await dbs.get(address).dexie.receivePartners.put({
+            const v = row.values
+            await this.dbs.get(this.my).dexie.receivePartners.put({
+                address: v[0],
+                value: v[1],
+                count: v[2],
+                firsted: v[3],
+                lasted: v[4],
+            })
+            /*
+            await this.dbs.get(this.my).dexie.receivePartners.put({
                 address: row.address,
                 value: row.value,
                 count: row.count,
                 firsted: row.firsted,
                 lasted: row.lasted,
             })
+            */
         }
         rows = db.exec(`select * from transactions;`)
         console.debug(rows)
         for (const row of rows) {
-            await dbs.get(address).dexie.transactions.put({
+            const v = row.values
+            await this.dbs.get(this.my).dexie.transactions.put({
+                txid: v[0],
+                isSend: v[1],
+                addresses: v[2],
+                value: v[3],
+                fee: v[4],
+                confirmations: v[5],
+                blockTime: v[6],
+                blockHeight: v[7],
+            })
+            /*
+            await this.dbs.get(this.my).dexie.transactions.put({
                 txid: row.txid,
                 isSend: row.is_send,
                 addresses: row.addresses,
@@ -108,17 +171,30 @@ class Sqlite3DbUploader {
                 blockTime: row.block_time,
                 blockHeight: row.block_height,
             })
+            */
         }
+        Loading.hide()
     }
     async #valid(db) {
-        const tableNames = db.exec(`select name from sqlite_master;`)
+        let res = db.exec(`select name from sqlite_master;`)
+        console.debug(res)
+        const tableNames = res[0].values.map(v=>v[0])
         console.debug(tableNames)
         const validTableNames = ['last', 'send_partners', 'receive_partners', 'transactions']
-        if (!tableNames.every(name=>validTableNames.includes(name))) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
+        if (!tableNames.every(name=>validTableNames.includes(name))) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。: ${validTableNames.join(', ')}`) }
         //if (!tableNames.all(validTableNames)) { return this.#validError(`必要なテーブルが存在しません。次の名前のテーブルを用意してください。`) }
+        /*
         if (!tableNames.map(name=>this.#validRow(db, name)).every()) { return false }
-        const validRow = await Promise.all(tableNames.map(async(name)=>await this.#validRow(db, name)).every());
-        if (!validRow) { return false }
+        const validRow = await Promise.all(
+            tableNames.map(
+            async(name)=>await this.#validRow(db, name))
+            .every(v=>v===true));
+        */
+        for (const name of tableNames) {
+            res = await this.#validRow(db, name)
+            if (!res) { return false }
+        }
+        //if (!validRow) { return false }
         if (!this.#validFields(db)) { return false }
         return true
     }
@@ -133,15 +209,27 @@ class Sqlite3DbUploader {
         return true
     }
     #validField(db, tableName, valids) {
-        const fields = db.exec(`PRAGMA table_info('${tableName}');`)
-        console.debug(lastFields)
-        if (!fields.map(f=>f[1]).every(n=>valids.includes(n))) { return this.#validError(`必要な列名が存在しません。次の名前のテーブルに次の列名を用意してください。${tableName}: ${valids.join(',')}`) }
+        let res = db.exec(`PRAGMA table_info('${tableName}');`)
+        console.debug(res)
+        const fields = res[0].values.map(v=>v[1])
+        console.debug(fields)
+        console.debug(valids)
+        if (!fields.every(n=>valids.includes(n))) { return this.#validError(`必要な列名が存在しません。次の名前のテーブルに次の列名を用意してください。${tableName}: ${valids.join(',')}`) }
         return true
     }
     async #validRow(db, name) {
-        const lCnt = db.exec(`select count(*) from ${name};`)
+        console.debug(db, name)
+        let res = db.exec(`select count(*) from ${name};`)
+        console.debug(res)
+        const lCnt = res[0].values[0][0]
+        console.debug(lCnt)
         if (0 == lCnt) { return this.#validError(`${name}テーブルのレコード数が0件です。1件以上あるときのみ取込できます。`) }
-        const bCnt = await this.dbs.get(this.my).dexie[name].count()
+        //console.debug(await this.dbs.get(this.my).dexie.table(name))
+        res = await this.dbs.get(this.my).dexie.table(Caser.snakeToCamel(name)).count()
+        console.debug(res)
+        //const bCnt = res[0].values[0][0]
+        const bCnt = res
+        console.debug(lCnt, bCnt)
         if (lCnt < bCnt) { return this.#validError(`${name}テーブルのレコード数がIndexedDBのそれより少ないです。古いDBとみなし取込を中止します。`) }
         return true
     }

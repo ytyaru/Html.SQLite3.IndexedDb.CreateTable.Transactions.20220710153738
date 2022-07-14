@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         const address = document.getElementById('address').value
         if (!address) { return }
         const uploader = new Sqlite3DbUploader(sqlFile, dbs, address)
-        uploader.setup() 
+        await uploader.setup() 
         console.debug(address)
         console.debug(dbs)
         console.debug(dbs.get(address))
@@ -176,6 +176,7 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         document.getElementById(`progress-rate`).style.display = 'none'
     });
     async function debugLast(res) {
+        console.debug(res)
         const address = document.getElementById('address').value
         const txs = await dbs.get(address).dexie.transactions.toArray()
         const cnfTxs = txs.filter(tx=>0<tx.confirmations)
@@ -195,7 +196,8 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         const record = {
             id: 1,
             //count: txs.length,
-            count: res.txs,
+            //count: res.txs,
+            count: txs.length,
             lastBlockHeight: maxBlockHeight,
             lastTxId: lastTxId,
             sendValue: parseInt(res.totalSent),

@@ -16,7 +16,7 @@ class Sqlite3DbDownloader {
         const url = (window.URL || window.webkitURL).createObjectURL(file);
         const download = document.createElement('a');
         download.href = url;
-        download.download = `${name}.zip`;
+        download.download = `monacoin-transaction-db.zip`;
         download.click();
         (window.URL || window.webkitURL).revokeObjectURL(url);
         Loading.hide()
@@ -45,7 +45,7 @@ class Sqlite3DbDownloader {
     async #makeTableLast(db) {
         const last = await this.dbs.get(this.my).dexie.last.get(1)
         db.exec(this.#createSqlLast())
-        db.exec(`insert into last values (
+        const sql = `insert into last values (
 1,
 ${last.count},
 ${last.lastBlockHeight},
@@ -63,7 +63,9 @@ ${last.receiveAddressCount},
 ${last.bothAddressCount},
 ${last.firsted},
 ${last.lasted}
-);`)
+);`
+        console.debug(sql)
+        db.exec(sql)
     }
     async #makeTableSendPartners(db) {
         db.exec(this.#createSqlSendPartners())
