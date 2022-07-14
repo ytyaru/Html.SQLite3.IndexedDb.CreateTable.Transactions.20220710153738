@@ -28,7 +28,10 @@ class Sqlite3DbUploader {
             console.debug(e)
             console.debug(e.target.files)
             fr.readAsArrayBuffer(e.target.files[0])
-            fr.onload = async()=>{ await this.#load(new Uint8Array(fr.result)) }
+            //fr.onload = async()=>{ await this.#load(new Uint8Array(fr.result)) }
+            fr.addEventListener('load', async(event) => {
+                await this.#load(new Uint8Array(fr.result)) 
+            })
             //previewFile(this.files[0]);
             //await this.#load(new Uint8Array(this.files[0])) 
         });
@@ -43,7 +46,10 @@ class Sqlite3DbUploader {
             fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
             const fr = new FileReader();
             fr.readAsArrayBuffer(files[0])
-            fr.onload = async()=>{ await this.#load(new Uint8Array(fr.result)) }
+            fr.addEventListener('load', async(event) => {
+                await this.#load(new Uint8Array(fr.result)) 
+            })
+            //fr.onload = async()=>{ await this.#load(new Uint8Array(fr.result)) }
             //fr.onload = async()=>{ await this.#preview(new Uint8Array(fr.result)) }
         }, false);
     }
@@ -52,17 +58,23 @@ class Sqlite3DbUploader {
         const db = await this.sqlFile.load(content)
         let res = await this.#valid(db)
         if (!res) { Loading.hide(); return; }
+        // 全レコード削除（なぜかpromiss errorになる）
         /*
         for (const name of ['last', 'send_partners', 'receive_partners', 'transactions']) {
-            await this.dbs.get(this.my).dexie[name].clear()
+            //await this.dbs.get(this.my).dexie[name].clear()
+            const table = this.dbs.get(this.my).dexie.table(name)
+            await table.clear()
         }
         */
+        // SQLite3DBレコードをIndexedDBに挿入する
         let rows = db.exec(`select * from last;`)
         console.debug(rows)
-        for (const row of rows) {
+        for (const row of rows[0].values) {
             console.debug(row)
-            if (1 !== row.id) { continue }
-            const v = row.values
+            if (1 !== row[0]) { continue }
+            const v = row
+            console.debug(row)
+            console.debug(v)
             await this.dbs.get(this.my).dexie.last.put({
                 id: 1,
                 count: v[1],
@@ -82,32 +94,13 @@ class Sqlite3DbUploader {
                 firsted: v[15],
                 lasted: v[16],
             })
-            /*
-            await this.dbs.get(this.my).dexie.last.put({
-                id: 1,
-                count: row.count,
-                lastBlockHeight: row.last_block_height,
-                lastTxId: row.last_txid,
-                sendValue: row.send_value,
-                receiveValue: row.receive_value,
-                balance: row.balance,
-                fee: row.fee,
-                unconfirmedBalance: row.unconfirmed_balance,
-                unconfirmedTxs: row.unconfirmed_txs,
-                sendCount: row.send_count,
-                receiveCount: row.receive_count,
-                sendAddressCount: row.send_address_count,
-                receiveAddressCount: row.receive_address_count,
-                bothAddressCount: row.both_address_count,
-                firsted: row.firsted,
-                lasted: row.lasted,
-            })
-            */
         }
         rows = db.exec(`select * from send_partners;`)
         console.debug(rows)
-        for (const row of rows) {
-            const v = row.values
+        for (const row of rows[0].values) {
+            const v = row
+            console.debug(row)
+            console.debug(v)
             await this.dbs.get(this.my).dexie.sendPartners.put({
                 address: v[0],
                 value: v[1],
@@ -115,20 +108,13 @@ class Sqlite3DbUploader {
                 firsted: v[3],
                 lasted: v[4],
             })
-            /*
-            await this.dbs.get(this.my).dexie.sendPartners.put({
-                address: row.address,
-                value: row.value,
-                count: row.count,
-                firsted: row.firsted,
-                lasted: row.lasted,
-            })
-            */
         }
         rows = db.exec(`select * from receive_partners;`)
         console.debug(rows)
-        for (const row of rows) {
-            const v = row.values
+        for (const row of rows[0].values) {
+            const v = row
+            console.debug(row)
+            console.debug(v)
             await this.dbs.get(this.my).dexie.receivePartners.put({
                 address: v[0],
                 value: v[1],
@@ -136,20 +122,13 @@ class Sqlite3DbUploader {
                 firsted: v[3],
                 lasted: v[4],
             })
-            /*
-            await this.dbs.get(this.my).dexie.receivePartners.put({
-                address: row.address,
-                value: row.value,
-                count: row.count,
-                firsted: row.firsted,
-                lasted: row.lasted,
-            })
-            */
         }
         rows = db.exec(`select * from transactions;`)
         console.debug(rows)
-        for (const row of rows) {
-            const v = row.values
+        for (const row of rows[0].values) {
+            const v = row
+            console.debug(row)
+            console.debug(v)
             await this.dbs.get(this.my).dexie.transactions.put({
                 txid: v[0],
                 isSend: v[1],
@@ -160,18 +139,6 @@ class Sqlite3DbUploader {
                 blockTime: v[6],
                 blockHeight: v[7],
             })
-            /*
-            await this.dbs.get(this.my).dexie.transactions.put({
-                txid: row.txid,
-                isSend: row.is_send,
-                addresses: row.addresses,
-                value: row.value,
-                fee: row.fee,
-                confirmations: row.confirmations,
-                blockTime: row.block_time,
-                blockHeight: row.block_height,
-            })
-            */
         }
         Loading.hide()
     }

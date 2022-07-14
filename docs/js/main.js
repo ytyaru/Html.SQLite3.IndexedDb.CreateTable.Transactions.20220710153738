@@ -24,6 +24,8 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         console.debug(dbs.get(address))
         console.debug(dbs.get(address).dexie)
         console.debug(dbs.get(address).dexie.last)
+        // デバッグ return
+        return
         const last = await dbs.get(address).dexie.last.get(1)
         console.debug(last)
         const options = {}
