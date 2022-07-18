@@ -24,8 +24,6 @@ window.addEventListener('DOMContentLoaded', async(event) => {
         console.debug(dbs.get(address))
         console.debug(dbs.get(address).dexie)
         console.debug(dbs.get(address).dexie.last)
-        // デバッグ return
-        return
         const last = await dbs.get(address).dexie.last.get(1)
         console.debug(last)
         const options = {}
@@ -226,6 +224,7 @@ window.addEventListener('DOMContentLoaded', async(event) => {
             const addr  = address || await window.mpurse.getAddress()
             if (!dbs.has(addr)) {
                 dbs.set(addr, new MonaTransactionDb(addr))
+                await dbs.get(addr).create(addr);
             }
             document.getElementById('address').value = addr
             document.getElementById('get-transaction').dispatchEvent(new Event('click'))

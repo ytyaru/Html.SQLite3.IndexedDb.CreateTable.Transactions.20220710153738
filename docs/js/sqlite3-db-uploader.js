@@ -23,6 +23,7 @@ class Sqlite3DbUploader {
             e.target.style.background = '#ffffff';
         }, false);
         fileInput.addEventListener('change', async(e)=>{
+            if (0 === e.target.files.length) { return }
             Loading.show()
             const fr = new FileReader();
             console.debug(e)
@@ -205,6 +206,8 @@ class Sqlite3DbUploader {
         alert(msg)
         return false
     }
+
+    /*
     async #preview(content) {
         const db = await this.sqlFile.read('users.db')
         let res = JSON.stringify(db.exec(`SELECT sqlite_version();`));
@@ -233,6 +236,7 @@ class Sqlite3DbUploader {
         console.debug(tables)
         Loading.hide()
     }
+    */
     /*
     async #preview(content) {
         if (!this.SQL) {
@@ -269,6 +273,7 @@ class Sqlite3DbUploader {
         Loading.hide()
     }
     */
+    /*
     #makeTable(data) {
         const th = data.columns.values.map(v=>`<th>${v[1]}</th>`).join('')
         const td = []
@@ -322,25 +327,8 @@ ${td.join('')}
         res = JSON.stringify(db.exec(`SELECT * FROM users;`));
         console.debug(res)
         return db.export()
-        /*
-        initSqlJs({
-            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
-        }).then(SQL => {
-            const db = new SQL.Database();
-            let res = JSON.stringify(db.exec("SELECT sqlite_version();"));
-            console.debug(res)
-            res = JSON.stringify(db.exec(`CREATE TABLE users(id INTEGER PRIMARY KEY, name TEXT);`));
-            console.debug(res)
-            const values = document.getElementById('usernames').value.split('\n').filter(v=>v).map(n=>`('${n}')`).join(',')
-            res = JSON.stringify(db.exec(`INSERT INTO users(name) VALUES ${values || "('ytyaru')"};`));
-            //res = JSON.stringify(db.exec(`INSERT INTO users(name) VALUES ('ytyaru');`));
-            console.debug(res)
-            res = JSON.stringify(db.exec(`SELECT * FROM users;`));
-            console.debug(res)
-            return db.export()
-        });
-        */
     }
+    */
     /*
     #makeHtmlFiles(files) {
         //for (const name of files.map(f=>file.url.split('/').slice(-1)[0])) {
