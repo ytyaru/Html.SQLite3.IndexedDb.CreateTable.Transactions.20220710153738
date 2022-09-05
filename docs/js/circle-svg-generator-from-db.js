@@ -9,20 +9,21 @@ class CircleSvgGeneratorFromDb {
     }
     generate(partners) { // partners: 取引相手のアドレスとプロフィール情報の配列
         this.partners = partners
-        console.debug(this.partners)
-        console.debug(this.userIconNum)
+        console.debug('partners:', this.partners)
+        console.debug('userIconNum:', this.userIconNum)
         // 外周に並べる画像数の合計[8, 24, 56, 104, 168, 256] [7, 21, 48, 96, 168, 261]
         this.outerNums = this.userIconNum.slice(1).map((v,i)=>this.userIconNum.slice(1,i+2).reduce((sum,v)=>sum+v))
-        console.debug(this.outerNums)
+        console.debug('outerNums', this.outerNums)
         const find = this.outerNums.findIndex(sum=>this.partners.length < sum)
-        console.debug(find)
-        const idx = (-1 == find) ? this.outerNums[this.userIconNum.length-1] : find
+        console.debug('find:', find)
+        //const idx = (-1 == find) ? this.outerNums[this.userIconNum.length-1] : find // 256アカウントを超えたらバグった
+        const idx = (-1 == find) ? this.outerNums[this.outerNums.length-1] : find
         // 外周数
         this.outerLen = idx+1
-        console.debug(this.outerLen)
+        console.debug('outerLen:', this.outerLen)
         // 画像全体サイズ
         this.size = (this.userIconSizes.slice(0,this.outerLen+1).reduce((sum,v)=>sum+v)*2) - this.userIconSizes[0]
-        console.debug(this.size)
+        console.debug('size:', this.size)
         // 外周ごとの画像数
         //this.userIconNum = Array.from({length: this.outerLen}, (v, k) => k).map(i=>this.#calcIconNum(i))
         //console.debug(this.userIconNum)
